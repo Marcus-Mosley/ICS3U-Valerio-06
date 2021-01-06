@@ -20,6 +20,10 @@
 #include "letter_map.c"
 #include "pause_data.c"
 #include "pause_map.c"
+#include "journey_data.c"
+#include "journey_map.c"
+#include "return_data.c"
+#include "return_map.c"
 #include "ValerioCharacter.c"
 #include "ValerioSprites.c"
 UINT8 i;
@@ -118,21 +122,51 @@ UBYTE canplayermove(UINT8 newplayerx, UINT8 newplayery) {
             sign();
         } else if (tileindexTL == 29 || tileindexTL == 30) {
             // Change to Battle Scene
-            stage = 1;
-            fadeout();
+            DISPLAY_OFF;
             HIDE_SPRITES;
-            newplayerx = 80;
-            newplayery = 120;
-            movegamecharacter(&valerio, newplayerx, newplayery);
-            set_bkg_data(0, 51, battle_data);
-            set_bkg_tiles(0, 0, 20, 18, battle_map);
-            SHOW_SPRITES;
-            fadein();
+            set_bkg_data(0, 33, journey_data);
+            set_bkg_tiles(0, 0, 20, 18, journey_map);
+            DISPLAY_ON;
+            while (gamerunning) {
+                if (joypad() & J_A) {
+                    stage = 1;
+                    fadeout();
+                    newplayerx = 80;
+                    newplayery = 120;
+                    movegamecharacter(&valerio, newplayerx, newplayery);
+                    set_bkg_data(0, 51, battle_data);
+                    set_bkg_tiles(0, 0, 20, 18, battle_map);
+                    SHOW_SPRITES;
+                    fadein();
+                    break;
+                } else if (joypad() & J_B) {
+                    DISPLAY_OFF;
+                    SHOW_SPRITES;
+                    set_bkg_data(0, 97, cave_data);
+                    set_bkg_tiles(0, 0, 20, 18, cave_map);
+                    DISPLAY_ON;
+                    break;
+                }
+            }
         }
     } else {
         result = battle_map[tileindexTL] == blankmap[0];
         stage = 2;
-        if (result == 1) {
+        if (tileindexTL == 329 || tileindexTL == 330) {
+            DISPLAY_OFF;
+            HIDE_SPRITES;
+            set_bkg_data(0, 32, return_data);
+            set_bkg_tiles(0, 0, 20, 18, return_map);
+            DISPLAY_ON;
+
+            waitpad(J_B);
+
+            DISPLAY_OFF;
+            SHOW_SPRITES;
+            set_bkg_data(0, 51, battle_data);
+            set_bkg_tiles(0, 0, 20, 18, battle_map);
+            DISPLAY_ON;
+        } else if (result == 1) {
             if (newplayerx <= 0 || newplayerx >= 160) {
                 result = 0;
             } else if (newplayery <= 0) {
